@@ -1,3 +1,7 @@
+/**
+ * Geet Traders - Production WhatsApp Bot Backend Server (ES Module Format)
+ * Railway Deployment v1.0.1 - Verified ES Imports
+ */
 import express from 'express';
 import axios from 'axios';
 import path from 'path';
