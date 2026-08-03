@@ -314,10 +314,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </button>
           </form>
 
-          <div className="mt-6 pt-4 border-t border-slate-700/60 text-xs text-slate-400">
-            🔒 Default Admin Password: <code className="bg-slate-900 text-emerald-400 px-2 py-1 rounded font-mono font-bold border border-slate-700">geet2026</code>
-          </div>
-
         </div>
       </div>
     );
