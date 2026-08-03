@@ -1,9 +1,10 @@
-/**
- * Geet Traders - Production WhatsApp Bot Backend Server (Railway / Render Ready)
- */
-
 import express from 'express';
 import axios from 'axios';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -14,12 +15,10 @@ const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || 'geettraders_secret_token_
 const WHATSAPP_TOKEN = process.env.META_WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.META_PHONE_NUMBER_ID;
 
-// Health Check Endpoint
-app.get('/', (req, res) => {
-  res.send('🛏️ Geet Traders WhatsApp Bot Webhook Server is running online!');
-});
+// 1. Serve Static Frontend Files (Vite dist folder)
+app.use(express.static(path.join(__dirname, 'dist')));
 
-// 1. Meta Webhook Verification (GET)
+// 2. Meta Webhook Verification (GET)
 app.get('/webhook', (req, res) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
@@ -33,7 +32,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// 2. Incoming Messages Webhook (POST)
+// 3. Incoming Messages Webhook (POST)
 app.post('/webhook', async (req, res) => {
   const body = req.body;
 
@@ -65,7 +64,7 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
-// Send WhatsApp Cloud API Message
+// Automated WhatsApp Reply Function
 async function handleBotReply(to, userText) {
   const text = userText.trim().toLowerCase();
   
@@ -109,6 +108,11 @@ async function handleBotReply(to, userText) {
   }
 }
 
+// 4. Fallback: Catch-all route to serve React Single Page Application (SPA)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 app.listen(PORT, () => {
-  console.log(`🚀 Geet Traders Webhook Server running on Railway port ${PORT}`);
+  console.log(`🚀 Geet Traders Webhook & Web Server running on Railway port ${PORT}`);
 });
