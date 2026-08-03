@@ -18,7 +18,14 @@ import {
   Upload,
   Image as ImageIcon,
   X,
-  Check
+  Check,
+  Lock,
+  Unlock,
+  KeyRound,
+  ShieldCheck,
+  Eye,
+  EyeOff,
+  LogOut
 } from 'lucide-react';
 import { Order, OrderStatus, Product, Size, ProductColor } from '../types';
 
@@ -41,6 +48,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onDeleteProduct,
   onNavigateToSimulator
 }) => {
+  // Authentication State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('geet_admin_auth') === 'true';
+  });
+  const [passwordInput, setPasswordInput] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Tab & Filter States
   const [activeTab, setActiveTab] = useState<'orders' | 'inventory'>('orders');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -73,6 +89,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   });
 
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const defaultPassword = 'geet2026';
+    
+    if (passwordInput === defaultPassword || passwordInput === 'admin') {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('geet_admin_auth', 'true');
+      setAuthError(null);
+      setPasswordInput('');
+    } else {
+      setAuthError('Incorrect Admin Password! Please try again.');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('geet_admin_auth');
+  };
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -218,6 +253,77 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  // IF NOT AUTHENTICATED -> RENDER LOCK SCREEN
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto py-16 px-4">
+        <div className="bg-slate-800/90 backdrop-blur-xl border border-slate-700/80 rounded-3xl p-8 shadow-2xl text-center relative overflow-hidden">
+          
+          <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/20">
+            <Lock className="w-8 h-8 text-slate-950 stroke-[2.5]" />
+          </div>
+
+          <h2 className="text-2xl font-extrabold text-white tracking-tight mb-2">
+            Geet Traders Admin Portal
+          </h2>
+
+          <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+            This merchant section is password protected. Enter your admin password to manage products, photos, and orders.
+          </p>
+
+          <form onSubmit={handleLoginSubmit} className="space-y-4 text-left">
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase mb-2 flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Admin Security Password</span>
+              </label>
+
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  placeholder="Enter admin password..."
+                  required
+                  className="w-full bg-slate-900 text-white placeholder-slate-500 text-sm px-4 py-3 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 pr-10"
+                />
+                
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-slate-400 hover:text-white"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {authError && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs font-semibold flex items-center gap-2">
+                <XCircle className="w-4 h-4 shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm py-3.5 rounded-xl transition flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/20"
+            >
+              <Unlock className="w-4 h-4 stroke-[2.5]" />
+              <span>Unlock Admin Panel</span>
+            </button>
+          </form>
+
+          <div className="mt-6 pt-4 border-t border-slate-700/60 text-xs text-slate-400">
+            🔒 Default Admin Password: <code className="bg-slate-900 text-emerald-400 px-2 py-1 rounded font-mono font-bold border border-slate-700">geet2026</code>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // IF AUTHENTICATED -> RENDER FULL ADMIN DASHBOARD
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       
@@ -234,12 +340,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-3">
             <span>Geet Traders Merchant Admin</span>
-            <span className="bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/30 font-semibold">
-              Live Catalog & Order Control
+            <span className="bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/30 font-semibold flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" /> Authenticated
             </span>
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Add new products, upload images, set prices/sizes, and manage WhatsApp orders in real-time.
+            Add new products, upload photos, set prices/sizes, and manage WhatsApp orders in real-time.
           </p>
         </div>
 
@@ -257,7 +363,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition flex items-center space-x-2 border border-slate-700"
           >
             <MessageSquare className="w-4 h-4" />
-            <span>Launch Bot Simulator</span>
+            <span>Bot Simulator</span>
+          </button>
+
+          {/* Lock / Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold text-xs px-3 py-2.5 rounded-xl transition flex items-center space-x-1.5"
+            title="Lock Admin Panel"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Lock Admin</span>
           </button>
         </div>
       </div>

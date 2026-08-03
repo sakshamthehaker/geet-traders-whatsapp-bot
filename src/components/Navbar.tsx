@@ -77,8 +77,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <LayoutDashboard className="w-4 h-4" />
-              <span className="hidden md:inline">Admin Dashboard</span>
-              <span className="md:hidden">Admin</span>
+              <span className="hidden md:inline flex items-center gap-1">Admin Dashboard 🔒</span>
+              <span className="md:hidden">Admin 🔒</span>
               {orderCount > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded-full text-xs border border-amber-500/30">
                   {orderCount}
