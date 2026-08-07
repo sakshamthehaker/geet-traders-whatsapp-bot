@@ -39,8 +39,9 @@ app.get('/webhook', (req, res) => {
 // 3. Incoming Messages Webhook (POST)
 app.post('/webhook', async (req, res) => {
   const body = req.body;
+  console.log('📩 Incoming Webhook POST Event:', JSON.stringify(body, null, 2));
 
-  if (body.object === 'whatsapp_business_account') {
+  if (body.object === 'whatsapp_business_account' || body.object === 'page') {
     for (const entry of body.entry) {
       for (const change of entry.changes) {
         if (change.value && change.value.messages) {
