@@ -94,7 +94,7 @@ async function handleBotReply(to, userText) {
 
   try {
     await axios.post(
-      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+      `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
       {
         messaging_product: 'whatsapp',
         to: to,
@@ -110,7 +110,7 @@ async function handleBotReply(to, userText) {
     );
     console.log(`✅ Message sent to ${to} via Meta API`);
   } catch (error) {
-    console.error('❌ Error sending Meta WhatsApp message:', error.response?.data || error.message);
+    console.error('❌ Meta API Send Error:', JSON.stringify(error.response?.data || error.message, null, 2));
   }
 }
 
