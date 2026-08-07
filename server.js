@@ -86,6 +86,7 @@ async function handleBotReply(to, userText) {
   }
 
   if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
+    console.log(`⚠️ Missing META_WHATSAPP_TOKEN or META_PHONE_NUMBER_ID environment variables in Railway!`);
     console.log(`[Simulated Meta Cloud API Send to ${to}]: ${replyText}`);
     return;
   }
