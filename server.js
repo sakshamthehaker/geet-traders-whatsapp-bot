@@ -19,10 +19,7 @@ const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || 'geettraders_secret_token_
 const WHATSAPP_TOKEN = process.env.META_WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.META_PHONE_NUMBER_ID;
 
-// 1. Serve Static Frontend Files (Vite dist folder)
-app.use(express.static(path.join(__dirname, 'dist')));
-
-// 2. Meta Webhook Verification (GET)
+// 1. Meta Webhook Verification (GET)
 app.get('/webhook', (req, res) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
@@ -36,7 +33,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// Test endpoint to trigger Meta API directly and diagnose tokens/errors
+// 2. Test endpoint to trigger Meta API directly and diagnose tokens/errors
 app.get('/api/test-bot', async (req, res) => {
   const to = req.query.to || '917275044929';
   const text = req.query.text || 'CATALOG';
@@ -83,6 +80,9 @@ app.get('/api/test-bot', async (req, res) => {
     });
   }
 });
+
+// 3. Serve Static Frontend Files (Vite dist folder)
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // 3. Incoming Messages Webhook (POST)
 app.post('/webhook', async (req, res) => {
