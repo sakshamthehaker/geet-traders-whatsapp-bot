@@ -118,6 +118,32 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
+// 4. Twilio WhatsApp Webhook (POST) - Zero Token Expiration, Instant Reply
+app.post('/twilio-webhook', express.urlencoded({ extended: true }), (req, res) => {
+  const from = req.body.From || '';
+  const body = req.body.Body || '';
+
+  console.log(`📩 Received Twilio WhatsApp message from ${from}: "${body}"`);
+
+  let replyText = `👋 *Welcome to Geet Traders!* ✨\n\nYour trusted supplier for Premium Mink Blankets, Flannel Dohars, Pashmina Lohis, and Pure Cotton Bedsheets (S/B & D/B).\n\nReply CATALOG to view items or ORDER to place an order.`;
+
+  const text = body.trim().toLowerCase();
+  if (text.includes('catalog') || text.includes('items') || text.includes('blanket')) {
+    replyText = `🛏️ *Geet Traders Catalog:*\n\n` +
+      `1. *Mink Blanket* (Single Bed S/B - ₹1499 | Double Bed D/B - ₹1999)\n` +
+      `2. *Flannel Chader* (S/B - ₹799 | D/B - ₹1199)\n` +
+      `3. *Flannel Dohar* (S/B - ₹999 | D/B - ₹1499)\n` +
+      `4. *Flannel Bedsheet 1+2 Set* (S/B - ₹1199 | D/B - ₹1699)\n` +
+      `5. *Lohi Shawls* (Cream, Pashmina, Orange, Black - ₹899)\n` +
+      `6. *Cotton Bedsheets* (S/B - ₹699 | D/B - ₹999)\n\n` +
+      `Reply with the item name & size (S/B or D/B) to order!`;
+  }
+
+  // Send TwiML XML response back to Twilio
+  res.type('text/xml');
+  res.send(`<Response><Message>${replyText}</Message></Response>`);
+});
+
 // Automated WhatsApp Reply Function
 async function handleBotReply(to, userText) {
   const token = (process.env.META_WHATSAPP_TOKEN || '').trim();
