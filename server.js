@@ -166,6 +166,9 @@ async function handleBotReply(to, userText) {
 
 // 4. Fallback: Catch-all route to serve React Single Page Application (SPA)
 app.get('*', (req, res) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/webhook') || req.path === '/test') {
+    return res.status(404).json({ error: `API route ${req.path} not found` });
+  }
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
