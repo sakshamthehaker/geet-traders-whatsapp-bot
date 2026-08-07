@@ -33,17 +33,16 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// 2. Test endpoint to trigger Meta API directly and diagnose tokens/errors
-app.get('/api/test-bot', async (req, res) => {
+// 2. Short Test endpoint to trigger Meta API directly
+app.get('/test', async (req, res) => {
   const to = req.query.to || '917275044929';
-  const text = req.query.text || 'CATALOG';
   const token = (process.env.META_WHATSAPP_TOKEN || '').trim();
   const phoneId = (process.env.META_PHONE_NUMBER_ID || '').trim();
 
   if (!token || !phoneId) {
     return res.status(400).json({
-      success: false,
-      error: 'Missing environment variables in Railway!',
+      status: 'error',
+      message: 'Missing environment variables in Railway!',
       hasToken: !!token,
       hasPhoneId: !!phoneId
     });
@@ -68,15 +67,15 @@ app.get('/api/test-bot', async (req, res) => {
     );
 
     return res.json({
-      success: true,
+      status: 'success',
       message: 'Meta API call succeeded! Message sent to WhatsApp.',
-      metaResponse: metaRes.data
+      data: metaRes.data
     });
   } catch (error) {
     return res.status(500).json({
-      success: false,
-      error: 'Meta API returned an error',
-      details: error.response?.data || error.message
+      status: 'error',
+      message: 'Meta API Error',
+      metaError: error.response?.data || error.message
     });
   }
 });
