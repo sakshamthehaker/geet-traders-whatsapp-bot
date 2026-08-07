@@ -36,6 +36,54 @@ app.get('/webhook', (req, res) => {
   }
 });
 
+// Test endpoint to trigger Meta API directly and diagnose tokens/errors
+app.get('/api/test-bot', async (req, res) => {
+  const to = req.query.to || '917275044929';
+  const text = req.query.text || 'CATALOG';
+  const token = (process.env.META_WHATSAPP_TOKEN || '').trim();
+  const phoneId = (process.env.META_PHONE_NUMBER_ID || '').trim();
+
+  if (!token || !phoneId) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing environment variables in Railway!',
+      hasToken: !!token,
+      hasPhoneId: !!phoneId
+    });
+  }
+
+  try {
+    const metaRes = await axios.post(
+      `https://graph.facebook.com/v20.0/${phoneId}/messages`,
+      {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: to,
+        type: 'text',
+        text: { body: `🛏️ *Geet Traders Catalog Test Response*\n\n1. Mink Blanket (S/B - ₹1499 | D/B - ₹1999)\n2. Flannel Dohar (S/B - ₹999 | D/B - ₹1499)\n3. Cotton Bedsheets (S/B - ₹699 | D/B - ₹999)` }
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return res.json({
+      success: true,
+      message: 'Meta API call succeeded! Message sent to WhatsApp.',
+      metaResponse: metaRes.data
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: 'Meta API returned an error',
+      details: error.response?.data || error.message
+    });
+  }
+});
+
 // 3. Incoming Messages Webhook (POST)
 app.post('/webhook', async (req, res) => {
   const body = req.body;
