@@ -88,31 +88,33 @@ app.post('/webhook', async (req, res) => {
   const body = req.body;
   console.log('📩 Incoming Webhook POST Event:', JSON.stringify(body, null, 2));
 
+  // 1. Acknowledge Meta IMMEDIATELY with 200 OK so Meta doesn't timeout!
+  res.status(200).send('EVENT_RECEIVED');
+
+  // 2. Process incoming message in background
   if (body.object === 'whatsapp_business_account' || body.object === 'page') {
-    for (const entry of body.entry) {
-      for (const change of entry.changes) {
-        if (change.value && change.value.messages) {
+    for (const entry of (body.entry || [])) {
+      for (const change of (entry.changes || [])) {
+        if (change.value && change.value.messages && change.value.messages.length > 0) {
           const message = change.value.messages[0];
           const from = message.from; // Customer phone number
           const messageType = message.type;
 
           let textBody = '';
-          if (messageType === 'text') {
+          if (messageType === 'text' && message.text) {
             textBody = message.text.body;
           } else if (messageType === 'interactive') {
-            textBody = message.interactive.button_reply.id;
+            textBody = message.interactive?.button_reply?.id || message.interactive?.list_reply?.id || '';
           }
 
-          console.log(`📩 Received WhatsApp message from ${from}: ${textBody}`);
+          console.log(`📩 Processing WhatsApp message from ${from}: "${textBody}"`);
 
-          // Automated reply logic for Geet Traders
-          await handleBotReply(from, textBody);
+          if (textBody) {
+            await handleBotReply(from, textBody);
+          }
         }
       }
     }
-    res.status(200).send('EVENT_RECEIVED');
-  } else {
-    res.sendStatus(404);
   }
 });
 
