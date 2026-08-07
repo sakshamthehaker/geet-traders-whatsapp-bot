@@ -71,6 +71,8 @@ app.post('/webhook', async (req, res) => {
 
 // Automated WhatsApp Reply Function
 async function handleBotReply(to, userText) {
+  const token = (process.env.META_WHATSAPP_TOKEN || '').trim();
+  const phoneId = (process.env.META_PHONE_NUMBER_ID || '').trim();
   const text = userText.trim().toLowerCase();
   
   let replyText = `👋 *Welcome to Geet Traders!* ✨\n\nYour trusted supplier for Premium Mink Blankets, Flannel Dohars, Pashmina Lohis, and Pure Cotton Bedsheets (S/B & D/B).\n\nReply CATALOG to view items or ORDER to place an order.`;
@@ -86,29 +88,30 @@ async function handleBotReply(to, userText) {
       `Reply with the item name & size (S/B or D/B) to order!`;
   }
 
-  if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
+  if (!token || !phoneId) {
     console.log(`⚠️ Missing META_WHATSAPP_TOKEN or META_PHONE_NUMBER_ID environment variables in Railway!`);
     console.log(`[Simulated Meta Cloud API Send to ${to}]: ${replyText}`);
     return;
   }
 
   try {
-    await axios.post(
-      `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
+    const res = await axios.post(
+      `https://graph.facebook.com/v20.0/${phoneId}/messages`,
       {
         messaging_product: 'whatsapp',
+        recipient_type: 'individual',
         to: to,
         type: 'text',
         text: { body: replyText }
       },
       {
         headers: {
-          'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       }
     );
-    console.log(`✅ Message sent to ${to} via Meta API`);
+    console.log(`✅ Message sent successfully to ${to} via Meta API! Status: ${res.status}`);
   } catch (error) {
     console.error('❌ Meta API Send Error:', JSON.stringify(error.response?.data || error.message, null, 2));
   }
